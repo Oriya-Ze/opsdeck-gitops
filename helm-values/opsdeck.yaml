@@ -1,0 +1,13 @@
+serviceAccount:
+  roleArn: FILL_IN
+
+backend:
+  image:
+    repository: FILL_IN.dkr.ecr.us-east-1.amazonaws.com/opsdeck/backend
+  env:
+    S3_BUCKET: FILL_IN
+    S3_REGION: us-east-1
+
+frontend:
+  image:
+    repository: FILL_IN.dkr.ecr.us-east-1.amazonaws.com/opsdeck/frontend
