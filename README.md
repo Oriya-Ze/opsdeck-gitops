@@ -8,6 +8,7 @@ ArgoCD applications for the OpsDeck EKS environment.
 2. ArgoCD installed in the cluster
 3. Tailscale ACL tags and OAuth client (admin console)
 4. HTTPS enabled on the tailnet
+5. `terraform apply` in opsdeck-terra
 
 ## Bootstrap
 
@@ -17,15 +18,14 @@ kubectl create namespace tailscale
 kubectl create secret generic operator-oauth -n tailscale \
   --from-literal=client_id=YOUR_CLIENT_ID \
   --from-literal=client_secret=YOUR_CLIENT_SECRET
-
-kubectl create namespace opsdeck
-
-kubectl create secret generic opsdeck-secrets -n opsdeck \
-  --from-literal=database-url=YOUR_DATABASE_URL \
-  --from-literal=encryption-key=YOUR_ENCRYPTION_KEY
 ```
 
-Edit `helm-values/opsdeck.yaml` with your ECR URLs, IRSA role ARN, and S3 bucket name.
+Set in `helm-values/external-secrets.yaml`:
+- `serviceAccount.annotations.eks.amazonaws.com/role-arn` from `terraform output eso_irsa_role_arn`
+
+Set in `helm-values/opsdeck.yaml`:
+- `serviceAccount.roleArn` from `terraform output backend_irsa_role_arn`
+- `backend.env.S3_BUCKET` from `terraform output s3_backup_bucket_name`
 
 Apply the root application once:
 
@@ -33,13 +33,29 @@ Apply the root application once:
 kubectl apply -f apps/root.yaml
 ```
 
+## Sync order
+
+```
+-2  external-secrets (operator)
+-1  external-secrets-config (ClusterSecretStore + ExternalSecret)
+ 0  tailscale-operator
+ 1  opsdeck
+```
+
 ## Layout
 
 ```
 apps/
-  root.yaml                 bootstrap app-of-apps
+  root.yaml
+  external-secrets.yaml
+  external-secrets-config.yaml
   tailscale-operator.yaml
   opsdeck.yaml
+manifests/
+  eso/
+    cluster-secret-store.yaml
+    external-secret-opsdeck.yaml
 helm-values/
-  opsdeck.yaml              env-specific Helm overrides
+  external-secrets.yaml
+  opsdeck.yaml
 ```
