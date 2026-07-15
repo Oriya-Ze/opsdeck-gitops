@@ -3,11 +3,13 @@ serviceAccount:
 
 backend:
   image:
-    repository: FILL_IN.dkr.ecr.us-east-1.amazonaws.com/opsdeck/backend
+    repository: 376129883917.dkr.ecr.us-east-1.amazonaws.com/opsdeck/backend
+    tag: latest
   env:
     S3_BUCKET: FILL_IN
     S3_REGION: us-east-1
 
 frontend:
   image:
-    repository: FILL_IN.dkr.ecr.us-east-1.amazonaws.com/opsdeck/frontend
+    repository: 376129883917.dkr.ecr.us-east-1.amazonaws.com/opsdeck/frontend
+    tag: latest
